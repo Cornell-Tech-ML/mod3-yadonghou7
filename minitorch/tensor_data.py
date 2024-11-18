@@ -77,6 +77,7 @@ def to_index(ordinal: int, shape: Shape, out_index: OutIndex) -> None:
         out_index[i] = int(cur_ord % sh)  # Compute the current index
         cur_ord = cur_ord // sh  # Update the remaining ordinal
 
+
 def broadcast_index(
     big_index: Index, big_shape: Shape, shape: Shape, out_index: OutIndex
 ) -> None:

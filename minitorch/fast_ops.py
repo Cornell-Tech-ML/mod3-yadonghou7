@@ -19,7 +19,7 @@ if TYPE_CHECKING:
     from typing import Callable, Optional
 
     from .tensor import Tensor
-    from .tensor_data import Index, Shape, Storage, Strides
+    from .tensor_data import Shape, Storage, Strides
 
 # TIP: Use `NUMBA_DISABLE_JIT=1 pytest tests/ -m task3_1` to run these tests without JIT.
 
@@ -182,8 +182,6 @@ def tensor_map(
                 out_pos = index_to_position(out_i, out_strides)
                 out[out_pos] = fn(in_storage[in_pos])
 
-
-
     return njit(_map, parallel=True)  # type: ignore
 
 
@@ -224,7 +222,7 @@ def tensor_zip(
         """Element-wise binary operation on two tensors with broadcasting.
 
         Args:
-        -----
+        ----
             out: Output storage for the result tensor.
             out_shape: Shape of the output tensor.
             out_strides: Strides of the output tensor.
@@ -237,8 +235,9 @@ def tensor_zip(
             fn: Binary function to apply to corresponding elements.
 
         Returns:
-        --------
+        -------
             None. The result is written to `out`.
+
         """
         MAX_DIMS = len(out_shape)
 
@@ -263,7 +262,6 @@ def tensor_zip(
                 out[out_pos] = fn(a_storage[a_pos], b_storage[b_pos])
 
     return njit(_zip, parallel=True)
-
 
 
 def tensor_reduce(
@@ -299,7 +297,7 @@ def tensor_reduce(
         """Reduce a tensor along a specified dimension using a reduction function.
 
         Args:
-        -----
+        ----
             out: Output storage for the reduced tensor.
             out_shape: Shape of the output tensor.
             out_strides: Strides of the output tensor.
@@ -310,11 +308,14 @@ def tensor_reduce(
             fn: Reduction function to apply.
 
         Returns:
-        --------
+        -------
             None. The result is written to `out`.
+
         """
         MAX_DIMS = len(a_shape)
-        reduce_size = a_shape[reduce_dim]  # Number of elements in the reduction dimension
+        reduce_size = a_shape[
+            reduce_dim
+        ]  # Number of elements in the reduction dimension
         reduce_stride = a_strides[reduce_dim]  # Stride for the reduction dimension
 
         for i in prange(len(out)):  # Parallel loop over output elements
@@ -322,7 +323,6 @@ def tensor_reduce(
             out_i = np.empty(MAX_DIMS, np.int32)
             temp_i = i
             to_index(temp_i, out_shape, out_i)
-
 
             # Calculate linear positions in output and input storage
             out_pos = index_to_position(out_i, out_strides)
@@ -332,15 +332,16 @@ def tensor_reduce(
             cur = out[out_pos]
 
             # Perform the reduction along the specified dimension
-            for _ in range(reduce_size): 
+            for _ in range(reduce_size):
                 cur = fn(cur, a_storage[in_pos])
-                in_pos += reduce_stride  # Move to the next element in the reduction dimension
+                in_pos += (
+                    reduce_stride  # Move to the next element in the reduction dimension
+                )
 
             # Write the reduced value to the output storage
             out[out_pos] = cur
 
     return njit(_reduce, parallel=True)
-
 
 
 def _tensor_matrix_multiply(
@@ -412,7 +413,9 @@ def _tensor_matrix_multiply(
                     b_pos += b_inner_stride  # Move along the column of B
 
                 # Write the result to the output tensor
-                out_pos = batch * out_strides[0] + i * out_strides[1] + j * out_strides[2]
+                out_pos = (
+                    batch * out_strides[0] + i * out_strides[1] + j * out_strides[2]
+                )
                 out[out_pos] = cur
 
 
