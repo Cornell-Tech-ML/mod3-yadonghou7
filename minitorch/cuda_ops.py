@@ -329,47 +329,47 @@ def tensor_reduce(
         pos = cuda.threadIdx.x
 
         # TODO: Implement for Task 3.3.
-        cache[pos] = reduce_value
-        if out_pos < out_size:
-            to_index(out_pos, out_shape, out_index)
-            dim = a_shape[reduce_dim]
-            out_index[reduce_dim] = out_index[reduce_dim] * BLOCK_DIM + pos
+        # cache[pos] = reduce_value
+        # if out_pos < out_size:
+        #     to_index(out_pos, out_shape, out_index)
+        #     dim = a_shape[reduce_dim]
+        #     out_index[reduce_dim] = out_index[reduce_dim] * BLOCK_DIM + pos
 
-            if out_index[reduce_dim] < dim:
-                cache[pos] = a_storage[index_to_position(out_index, a_strides)]
-                cuda.syncthreads()
-                idx = 0
-                while 2 ** idx < BLOCK_DIM:
-                    if pos % ((2 ** idx) * 2) == 0:
-                        cache[pos] = fn(cache[pos], cache[pos + (2 ** idx)])
-                        cuda.syncthreads()
-                    idx += 1
-            if pos == 0:
-                out[index_to_position(out_index, out_strides)] = cache[0]
-        # to_index(out_pos, out_shape, out_index)
+        #     if out_index[reduce_dim] < dim:
+        #         cache[pos] = a_storage[index_to_position(out_index, a_strides)]
+        #         cuda.syncthreads()
+        #         idx = 0
+        #         while 2 ** idx < BLOCK_DIM:
+        #             if pos % ((2 ** idx) * 2) == 0:
+        #                 cache[pos] = fn(cache[pos], cache[pos + (2 ** idx)])
+        #                 cuda.syncthreads()
+        #             idx += 1
+        #     if pos == 0:
+        #         out[index_to_position(out_index, out_strides)] = cache[0]
+        to_index(out_pos, out_shape, out_index)
 
-        # reduce_size = a_shape[reduce_dim]
+        reduce_size = a_shape[reduce_dim]
 
-        # if pos < reduce_size:
-        #     out_index[reduce_dim] = pos
-        #     a_pos = index_to_position(out_index, a_strides)
-        #     cache[pos] = a_storage[a_pos]
-        # else:
-        #     cache[pos] = reduce_value
+        if pos < reduce_size:
+            out_index[reduce_dim] = pos
+            a_pos = index_to_position(out_index, a_strides)
+            cache[pos] = a_storage[a_pos]
+        else:
+            cache[pos] = reduce_value
 
-        # cuda.syncthreads()
+        cuda.syncthreads()
 
-        # stride = BLOCK_DIM // 2
-        # while stride > 0:
-        #     if pos < stride and pos + stride < reduce_size:
-        #         cache[pos] = fn(cache[pos], cache[pos + stride])
-        #     cuda.syncthreads()
-        #     stride //= 2
+        stride = BLOCK_DIM // 2
+        while stride > 0:
+            if pos < stride and pos + stride < reduce_size:
+                cache[pos] = fn(cache[pos], cache[pos + stride])
+            cuda.syncthreads()
+            stride //= 2
 
-        # if pos == 0:
-        #     out_index[reduce_dim] = 0
-        #     o_pos = index_to_position(out_index, out_strides)
-        #     out[o_pos] = cache[0]
+        if pos == 0:
+            out_index[reduce_dim] = 0
+            o_pos = index_to_position(out_index, out_strides)
+            out[o_pos] = cache[0]
 
     return jit(_reduce)  # type: ignore
 
