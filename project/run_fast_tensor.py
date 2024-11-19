@@ -1,7 +1,5 @@
 import random
-
 import numba
-
 import minitorch
 
 datasets = minitorch.datasets
@@ -29,7 +27,6 @@ class Network(minitorch.Module):
         self.layer3 = Linear(hidden, 1, backend)
 
     def forward(self, x):
-        # TODO: Implement for Task 3.5.
         l = self.layer1.forward(x).relu()
         l = self.layer2.forward(l).relu()
         return self.layer3.forward(l).sigmoid()
@@ -62,7 +59,7 @@ class FastTrain:
     def run_many(self, X):
         return self.model.forward(minitorch.tensor(X, backend=self.backend))
 
-    def train(self, data, learning_rate, max_epochs=500, log_fn=default_log_fn):
+    def train(self, data, learning_rate, max_epochs=350, log_fn=default_log_fn):
         self.model = Network(self.hidden_layers, self.backend)
         optim = minitorch.SGD(self.model.parameters(), learning_rate)
         BATCH = 10
@@ -79,7 +76,6 @@ class FastTrain:
                 X = minitorch.tensor(X_shuf[i : i + BATCH], backend=self.backend)
                 y = minitorch.tensor(y_shuf[i : i + BATCH], backend=self.backend)
                 # Forward
-
                 out = self.model.forward(X).view(y.shape[0])
                 prob = (out * y) + (out - 1.0) * (y - 1.0)
                 loss = -prob.log()
@@ -92,7 +88,7 @@ class FastTrain:
 
             losses.append(total_loss)
             # Logging
-            if epoch % 10 == 0 or epoch == max_epochs:
+            if epoch % 10 == 0 or epoch == max_epochs - 1:
                 X = minitorch.tensor(data.X, backend=self.backend)
                 y = minitorch.tensor(data.y, backend=self.backend)
                 out = self.model.forward(X).view(y.shape[0])
@@ -106,10 +102,11 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--PTS", type=int, default=50, help="number of points")
-    parser.add_argument("--HIDDEN", type=int, default=10, help="number of hiddens")
+    parser.add_argument("--HIDDEN", type=int, default=10, help="number of hidden layers")
     parser.add_argument("--RATE", type=float, default=0.05, help="learning rate")
     parser.add_argument("--BACKEND", default="cpu", help="backend mode")
     parser.add_argument("--DATASET", default="simple", help="dataset")
+    parser.add_argument("--EPOCH", type=int, default=350, help="number of epochs")  # Added argument
     parser.add_argument("--PLOT", default=False, help="dataset")
 
     args = parser.parse_args()
@@ -125,7 +122,8 @@ if __name__ == "__main__":
 
     HIDDEN = int(args.HIDDEN)
     RATE = args.RATE
+    EPOCH = args.EPOCH  # Capture the epoch argument
 
     FastTrain(
         HIDDEN, backend=FastTensorBackend if args.BACKEND != "gpu" else GPUBackend
-    ).train(data, RATE)
+    ).train(data, RATE, max_epochs=EPOCH)  # Pass the EPOCH value to train
