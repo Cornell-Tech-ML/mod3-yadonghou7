@@ -224,7 +224,7 @@ def tensor_zip(
 
         # TODO: Implement for Task 3.3.
         if 0 <= i < out_size: 
-        print("You're debugging the zip")
+            print("You're debugging the zip")
             to_index(i, out_shape, out_index)
             broadcast_index(out_index, out_shape, a_shape, a_index)
             broadcast_index(out_index, out_shape, b_shape, b_index)
