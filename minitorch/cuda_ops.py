@@ -495,41 +495,20 @@ def _tensor_matrix_multiply(
     #    b) Copy into shared memory for b matrix
     #    c) Compute the dot produce for position c[i, j]
     # TODO: Implement for Task 3.4.
-    a_base = batch * a_batch_stride
-    b_base = batch * b_batch_stride
-
-    m = a_shape[1]  
-    n = b_shape[2]  
-    k = a_shape[2]  #
-
-    if i < m and j < n:
-        acc = 0.0
-        
-        for block_idx in range((k + BLOCK_DIM - 1) // BLOCK_DIM):
-            k_start = block_idx * BLOCK_DIM
-            k_size = min(BLOCK_DIM, k - k_start)
-            
-            if pi < m and pj < k_size:
-                a_idx = a_base + i * a_strides[1] + (k_start + pj) * a_strides[2]
-                a_shared[pi, pj] = a_storage[a_idx]
-            else:
-                a_shared[pi, pj] = 0.0
-            
-            if pi < k_size and pj < n:
-                b_idx = b_base + (k_start + pi) * b_strides[1] + j * b_strides[2]
-                b_shared[pi, pj] = b_storage[b_idx]
-            else:
-                b_shared[pi, pj] = 0.0
-            
-            cuda.syncthreads()
-            
-            for k_idx in range(k_size):
-                acc += a_shared[pi, k_idx] * b_shared[k_idx, pj]
-            cuda.syncthreads()
-        
-        if i < m and j < n:
-            out_idx = batch * out_strides[0] + i * out_strides[1] + j * out_strides[2]
-            out[out_idx] = acc
+    accum = 0.0
+    for idx in range(0, a_shape[2], BLOCK_DIM):
+        k = idx + pj
+        if i < a_shape[1] and k < a_shape[2]:
+            a_shared[pi, pj] = a_storage[a_batch_stride * batch + a_strides[1] * i + a_strides[2] * k]
+        k = idx + pi
+        if j < b_shape[2] and k < b_shape[1]:
+            b_shared[pi, pj] = b_storage[b_batch_stride * batch + b_strides[2] * j + b_strides[1] * k]
+        cuda.syncthreads()
+        for k in range(BLOCK_DIM):
+            if( idx + k ) < a_shape[2]:
+                accum += a_shared[pi, k] * b_shared[k, pj]
+    if i < out_shape[1] and j < out_shape[2]:
+        out[out_strides[0] * batch + out_strides[1] * i + out_strides[2] * j] = accum
 
 
 
