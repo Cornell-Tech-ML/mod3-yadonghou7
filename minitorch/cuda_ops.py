@@ -174,10 +174,10 @@ def tensor_map(
         in_index = cuda.local.array(MAX_DIMS, numba.int32)
         i = cuda.blockIdx.x * cuda.blockDim.x + cuda.threadIdx.x
         # TODO: Implement for Task 3.3.
-        to_index(i, out_shape, out_index)
-        broadcast_index(out_index, out_shape, in_shape, in_index)
-
+        print("You're debugging the map")
         if 0 <= i < out_size:
+            to_index(i, out_shape, out_index)
+            broadcast_index(out_index, out_shape, in_shape, in_index)
             out_i = index_to_position(out_index, out_strides)
             in_i = index_to_position(in_index, in_strides)
             out[out_i] = fn(in_storage[in_i])
@@ -223,7 +223,8 @@ def tensor_zip(
         i = cuda.blockIdx.x * cuda.blockDim.x + cuda.threadIdx.x
 
         # TODO: Implement for Task 3.3.
-        if 0 <= i < out_size:  # 先检查范围
+        if 0 <= i < out_size: 
+        print("You're debugging the zip")
             to_index(i, out_shape, out_index)
             broadcast_index(out_index, out_shape, a_shape, a_index)
             broadcast_index(out_index, out_shape, b_shape, b_index)
@@ -330,6 +331,7 @@ def tensor_reduce(
         pos = cuda.threadIdx.x
 
         # TODO: Implement for Task 3.3.
+        print("You're debugging the reduce")
         to_index(out_pos, out_shape, out_index)
 
         reduce_size = a_shape[reduce_dim]
@@ -391,6 +393,8 @@ def _mm_practice(out: Storage, a: Storage, b: Storage, size: int) -> None:
     """
     BLOCK_DIM = 32
     # TODO: Implement for Task 3.3.
+    print("You're debugging the _mm_practice")
+    
     shared_a = cuda.shared.array((BLOCK_DIM, BLOCK_DIM), numba.float64)
     shared_b = cuda.shared.array((BLOCK_DIM, BLOCK_DIM), numba.float64)
 
@@ -454,6 +458,7 @@ def _tensor_matrix_multiply(
     Returns:
         None : Fills in `out`
     """
+    
     a_batch_stride = a_strides[0] if a_shape[0] > 1 else 0
     b_batch_stride = b_strides[0] if b_shape[0] > 1 else 0
     # Batch dimension - fixed
@@ -477,6 +482,7 @@ def _tensor_matrix_multiply(
     #    b) Copy into shared memory for b matrix
     #    c) Compute the dot produce for position c[i, j]
     # TODO: Implement for Task 3.4.
+    print("You're debugging the _tensor_matrix_multiply")
     a_base = batch * a_batch_stride
     b_base = batch * b_batch_stride
 
