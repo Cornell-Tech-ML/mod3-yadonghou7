@@ -1,3 +1,9 @@
+"""minitorch package
+
+This package provides a set of modules for mathematical operations,
+automatic differentiation, and other utilities for building neural networks.
+"""
+
 from .testing import MathTest, MathTestVariable  # type: ignore # noqa: F401,F403
 from .fast_ops import *  # noqa: F401,F403
 from .cuda_ops import *  # noqa: F401,F403
