@@ -329,23 +329,6 @@ def tensor_reduce(
         pos = cuda.threadIdx.x
 
         # TODO: Implement for Task 3.3.
-        # cache[pos] = reduce_value
-        # if out_pos < out_size:
-        #     to_index(out_pos, out_shape, out_index)
-        #     dim = a_shape[reduce_dim]
-        #     out_index[reduce_dim] = out_index[reduce_dim] * BLOCK_DIM + pos
-
-        #     if out_index[reduce_dim] < dim:
-        #         cache[pos] = a_storage[index_to_position(out_index, a_strides)]
-        #         cuda.syncthreads()
-        #         idx = 0
-        #         while 2 ** idx < BLOCK_DIM:
-        #             if pos % ((2 ** idx) * 2) == 0:
-        #                 cache[pos] = fn(cache[pos], cache[pos + (2 ** idx)])
-        #                 cuda.syncthreads()
-        #             idx += 1
-        #     if pos == 0:
-        #         out[index_to_position(out_index, out_strides)] = cache[0]
         to_index(out_pos, out_shape, out_index)
 
         reduce_size = a_shape[reduce_dim]
@@ -495,7 +478,7 @@ def _tensor_matrix_multiply(
     #    b) Copy into shared memory for b matrix
     #    c) Compute the dot produce for position c[i, j]
     # TODO: Implement for Task 3.4.
-    accum = 0.0
+    acc = 0.0
     for idx in range(0, a_shape[2], BLOCK_DIM):
         k = idx + pj
         if i < a_shape[1] and k < a_shape[2]:
@@ -506,9 +489,9 @@ def _tensor_matrix_multiply(
         cuda.syncthreads()
         for k in range(BLOCK_DIM):
             if( idx + k ) < a_shape[2]:
-                accum += a_shared[pi, k] * b_shared[k, pj]
+                acc += a_shared[pi, k] * b_shared[k, pj]
     if i < out_shape[1] and j < out_shape[2]:
-        out[out_strides[0] * batch + out_strides[1] * i + out_strides[2] * j] = accum
+        out[out_strides[0] * batch + out_strides[1] * i + out_strides[2] * j] = acc
 
 
 
