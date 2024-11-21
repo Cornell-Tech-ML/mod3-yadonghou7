@@ -34,6 +34,8 @@ The files that will be synced are:
 
 
 ## Task 3.1 and 3.2
+**Optimization Log:**
+```
 (base) yadonghou@Yadongs-MacBook-Pro mod3-yadonghou7 % python3 project/parallel_check.py
 Traceback (most recent call last):
   File "/Users/yadonghou/Documents/workspace/mod3-yadonghou7/project/parallel_check.py", line 1, in <module>
@@ -389,6 +391,7 @@ Allocation hoisting:
 No allocation hoisting found
 None
 
+```
 
 ## Test Result for Task3_3 and Task3_4
 ![Logo](image/3_3test.png)
