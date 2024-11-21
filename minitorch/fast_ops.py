@@ -30,6 +30,7 @@ Fn = TypeVar("Fn")
 
 
 def njit(fn: Fn, **kwargs: Any) -> Fn:
+    """JIT compile a function with Numba, inlining it always."""
     return _njit(inline="always", **kwargs)(fn)  # type: ignore
 
 

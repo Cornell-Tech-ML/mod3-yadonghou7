@@ -397,3 +397,19 @@ None
 ## Timing Graph
 ![Logo](image/timing1.png)
 ![Logo](image/timing2.png)
+
+## Simple
+![Logo](image/gpu-simple.png)
+![Logo](image/cpu-simple.png)
+
+## Simple-bigger
+![Logo](image/gpu-simple-larger.png)
+![Logo](image/cpu-simple-larger.png)
+
+## Split
+![Logo](image/gpu-split.png)
+![Logo](image/cpu-split.png)
+
+## XOR
+![Logo](image/gpu-xor.png)
+![Logo](image/cpu-xor.png)
